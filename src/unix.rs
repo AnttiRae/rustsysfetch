@@ -1,4 +1,5 @@
-
+use std::fs;
+use regex::Regex;
 
 pub fn get_info() -> Vec<String>{
     let mut info = Vec::new();
@@ -9,7 +10,7 @@ pub fn get_info() -> Vec<String>{
     info.push(get_uptime());
     info.push(get_memory());
     info.push(get_os_release());
-    info.push(get_os_release());
+    info.push(get_shell());
 
     info
 }
@@ -28,11 +29,16 @@ fn get_username() -> String {
     username
 }
 
-fn get_os_release() -> String {
-    let mut os_release = String::new();
-    os_release.push_str("os_release");
+pub fn get_os_release() -> String {
+    let file_path = "/etc/os-release";
 
-    os_release
+    let contents = fs::read_to_string(file_path)
+        .expect("Should have been able to read the file");
+
+    let re = Regex::new(r#"ID=(\w+)"#).unwrap();
+    let distro_id = re.captures(&contents).unwrap().get(1).map_or("", |m| m.as_str());
+
+    distro_id.to_string()
 }
 
 fn get_uptime() -> String {

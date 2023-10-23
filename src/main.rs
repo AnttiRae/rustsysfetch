@@ -25,6 +25,8 @@ fn main() {
 
     let test_info = unix::get_info();
 
+    let test = unix::get_os_release();
+
     for info in &test_info {
         info_string.push_str(&*format!("{} \n", info));
     }
