@@ -1,18 +1,22 @@
 mod unix;
 
+#[macro_use] extern crate rust_embed;
 #[macro_use] extern crate prettytable;
 
-use std::fs;
 use prettytable::Table;
 use prettytable::format;
 
-fn get_distro_logo(file_path: &str) -> String {
+#[derive(RustEmbed)]
+#[folder = "logos/"]
+struct Asset;
 
-    let contents = fs::read_to_string(file_path)
-        .expect("Should have been able to read the file");
-
-    contents
+fn get_distro_logo(distro: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let logo_file = Asset::get(distro).ok_or("Logo asset not found")?;
+    let logo_vec = logo_file.data.to_owned();
+    let logo = String::from_utf8(Vec::from(logo_vec))?;
+    Ok(logo)
 }
+
 
 fn main() {
 
@@ -26,8 +30,12 @@ fn main() {
     }
 
 
-    let logo = get_distro_logo("logos/fedora.txt");
-    logo_string.push_str(&logo);
+   match get_distro_logo("ubuntu") {
+        Ok(logo) => {
+            logo_string.push_str(&logo);
+        },
+        Err(e) => println!("An error occurred: {}", e),
+    }
 
     println!();
     let mut table = Table::new();
