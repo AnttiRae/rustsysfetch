@@ -2,7 +2,6 @@ mod unix;
 
 #[macro_use] extern crate prettytable;
 
-use std::env;
 use std::fs;
 use prettytable::Table;
 use prettytable::format;
