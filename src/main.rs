@@ -5,16 +5,16 @@ mod unix;
 
 use prettytable::Table;
 use prettytable::format;
+use std::io::{Cursor, Error};
+use std::io::ErrorKind;
+use rust_embed::EmbeddedFile;
 
 #[derive(RustEmbed)]
 #[folder = "logos/"]
 struct Asset;
 
-fn get_distro_logo(distro: &str) -> Result<String, Box<dyn std::error::Error>> {
-    let logo_file = Asset::get(distro).ok_or("Logo asset not found")?;
-    let logo_vec = logo_file.data.to_owned();
-    let logo = String::from_utf8(Vec::from(logo_vec))?;
-    Ok(logo)
+fn open_asset(name: &str) -> Result<EmbeddedFile, Error> {
+    Asset::get(name).ok_or(std::io::Error::new(ErrorKind::NotFound, "Asset not found"))
 }
 
 
@@ -30,17 +30,26 @@ fn main() {
     }
 
 
-   match get_distro_logo("ubuntu") {
+    let distro = unix::get_os_release();
+
+    match open_asset(&distro) {
         Ok(logo) => {
+            let logo_vec = logo.data.to_owned();
+            let logo = String::from_utf8(Vec::from(logo_vec)).unwrap();
             logo_string.push_str(&logo);
         },
-        Err(e) => println!("An error occurred: {}", e),
+        Err(e) => {
+            let logo = open_asset("penguin").unwrap();
+            let logo_vec = logo.data.to_owned();
+            let logo = String::from_utf8(Vec::from(logo_vec)).unwrap();
+            logo_string.push_str(&logo);
+        }
     }
 
     println!();
     let mut table = Table::new();
     table.set_format(*format::consts::FORMAT_CLEAN);
-    table.add_row(row![&logo_string, &info_string]);
+    table.add_row(row![&logo_string, "-", &info_string]);
     table.printstd();
     println!();
 }
