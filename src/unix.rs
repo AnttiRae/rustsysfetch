@@ -2,18 +2,35 @@ use std::{env, f64, fs};
 use std::fs::File;
 use std::io::Read;
 use regex::Regex;
+use colored::*;
+use colored::Styles::Strikethrough;
+
+
+fn build_lines_row(length: usize) -> String {
+    let mut lines = String::new();
+    for _ in 0..length {
+        lines.push_str("-")
+    }
+    lines
+}
 
 pub fn get_info() -> Vec<String>{
     let mut info = Vec::new();
 
-    info.push(format!("Username: {}", get_username()));
-    info.push(format!("Distro: {}", get_os_release()));
-    info.push(format!("Desktop: {}", get_desktop()));
-    info.push(format!("Hostname: {}", get_hostname()));
-    info.push(format!("Uptime: {}", get_uptime()));
-    info.push(format!("Memory: {}", get_memory()));
-    info.push(format!("CPU: {}", get_cpu()));
-    info.push(format!("Shell: {}", get_shell()));
+    let mut host_user_string = format!("{}@{}", get_hostname(), get_username());
+    let length = host_user_string.chars().count();
+
+    info.push(host_user_string.blue().to_string());
+    info.push(build_lines_row(length));
+    info.push(format!("{} {}", "OS:".blue().to_string(), get_os_release()));
+    info.push(format!("{} {}", "Kernel:".blue().to_string(), get_kernel_version()));
+    info.push(format!("{} {}", "Desktop:".blue().to_string(), get_desktop()));
+
+    info.push(format!("{} {}", "Uptime:".blue().to_string(), get_uptime()));
+    info.push(format!("{} {}", "Board:".blue().to_string(), get_host_board()));
+    info.push(format!("{} {}", "Memory:".blue().to_string(), get_memory()));
+    info.push(format!("{} {}", "CPU:".blue().to_string(), get_cpu()));
+    info.push(format!("{} {}", "Shell:".blue().to_string(), get_shell()));
 
     info
 }
@@ -170,3 +187,30 @@ fn get_cpu() -> String {
 
     cpu_info_string
 }
+
+fn get_host_board() -> String {
+    let file_path = "/sys/devices/virtual/dmi/id/board_name";
+    let mut boardname = String::new();
+
+    match File::open(file_path) {
+        Ok(mut file) => {
+            file.read_to_string(&mut boardname).unwrap();
+        }
+        Err(e) => {
+            boardname.push_str("0");
+        }
+    }
+    boardname.trim_end_matches('\n').to_string()
+}
+
+fn get_kernel_version() -> String {
+    let file_path = "/proc/version";
+
+    let file_content = fs::read_to_string(file_path).unwrap_or_default();
+
+    let cpu_info_string = extract_line_from_text(r"^Linux version ([\d\.]+-\d+\.\w+\.\w+)", &file_content)
+        .unwrap_or("No info".to_string());
+
+    cpu_info_string
+}
+

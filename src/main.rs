@@ -8,7 +8,6 @@ use prettytable::format;
 use std::io::{Error};
 use std::io::ErrorKind;
 use rust_embed::EmbeddedFile;
-
 #[derive(RustEmbed)]
 #[folder = "logos/"]
 struct Asset;
@@ -23,9 +22,9 @@ fn main() {
     let mut info_string = String::new();
     let mut logo_string = String::new();
 
-    let test_info = unix::get_info();
+    let sys_info = unix::get_info();
 
-    for info in &test_info {
+    for info in &sys_info {
         info_string.push_str(&*format!("{} \n", info));
     }
 
@@ -49,7 +48,7 @@ fn main() {
     println!();
     let mut table = Table::new();
     table.set_format(*format::consts::FORMAT_CLEAN);
-    table.add_row(row![&logo_string, "-", &info_string]);
+    table.add_row(row![&logo_string, &info_string]);
     table.printstd();
     println!();
 }

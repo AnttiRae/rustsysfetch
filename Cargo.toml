@@ -17,5 +17,4 @@ categories = ["command-line-utilities"]
 prettytable-rs = "0.10.0"
 rust-embed = "8.0.0"
 regex = { version = "1.10.2", features = [] }
-#sys-info = "0.5.6"
-#log = "0.4.1"
+colored = "2.0.4"
