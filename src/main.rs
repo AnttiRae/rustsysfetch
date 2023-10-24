@@ -5,7 +5,7 @@ mod unix;
 
 use prettytable::Table;
 use prettytable::format;
-use std::io::{Cursor, Error};
+use std::io::{Error};
 use std::io::ErrorKind;
 use rust_embed::EmbeddedFile;
 

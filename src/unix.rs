@@ -1,4 +1,4 @@
-use std::fs;
+use std::{env, f64, fs};
 use std::fs::File;
 use std::io::Read;
 use regex::Regex;
@@ -12,6 +12,7 @@ pub fn get_info() -> Vec<String>{
     info.push(format!("Hostname: {}", get_hostname()));
     info.push(format!("Uptime: {}", get_uptime()));
     info.push(format!("Memory: {}", get_memory()));
+    info.push(format!("CPU: {}", get_cpu()));
     info.push(format!("Shell: {}", get_shell()));
 
     info
@@ -27,7 +28,15 @@ fn get_hostname() -> String {
 
 fn get_username() -> String {
     let mut username = String::new();
-    username.push_str("username");
+
+    match env::var("USER") {
+        Ok(mut desktop_environment) => {
+            username.push_str(&*desktop_environment);
+        }
+        Err(e) => {
+            username.push_str("No Info")
+        }
+    }
 
     username
 }
@@ -49,50 +58,115 @@ fn format_uptime(seconds: f64) -> String {
     let hours = (minutes / 60.0).round();
     let days = (hours / 24.0).round();
 
-    format!("{} days, {} hours, {} minutes", days, hours % 24.0, minutes % 60.0)
+    if days == 0.0 {
+        format!("{} hours, {} minutes", hours, minutes % 60.0)
+    } else {
+        format!("{} days, {} hours, {} minutes", days, hours % 24.0, minutes % 60.0)
+    }
 }
 
 fn get_uptime() -> String {
     let file_path = "/proc/uptime";
     let mut uptime: String = String::new();
+    let mut uptime_seconds: f64 = 0.0;
 
     match File::open(file_path) {
         Ok(mut file) => {
             file.read_to_string(&mut uptime).unwrap();
-            let uptime_seconds = uptime.split(".").next().unwrap();
-            uptime = String::from(uptime_seconds);
-
+            let uptime_string = uptime.split(".").next().unwrap();
+            uptime_seconds = uptime_string.parse().unwrap();
         }
         Err(e) => {
             uptime.push_str("0");
         }
     }
-    let uptime_as_f64: f64 = uptime.parse().expect("Failed to convert uptime to f64");
-    let uptime: String = String::from("1234.56"); // your string
 
-    let uptime_as_f64: f64 = uptime.parse().expect("Failed to convert uptime to f64");
+    let uptime= format_uptime(uptime_seconds);
 
-    println!("{}", uptime_as_f64);
     uptime
 }
 
+/// Converts KB to MB
+fn kb_to_mb(memory_kb: i32) -> f64{
+    (memory_kb as f64) / 1024.0
+}
+
+fn extract_memory_from_content(pattern: &str, content: &str) -> Option<i32>{
+    let re = Regex::new(pattern).unwrap();
+    match re.captures(content) {
+        Some(cap) => {
+            cap[1].parse().ok()
+        },
+        None => None
+    }
+}
+
 fn get_memory() -> String {
-    let mut memory = String::new();
-    memory.push_str("memory");
+    let file_path = "/proc/meminfo";
+    let file_content = fs::read_to_string(file_path).unwrap_or_default();
+
+    let mem_total = extract_memory_from_content(r"MemTotal:\s+(\d+)", &file_content)
+                    .unwrap_or(0);
+    let mem_available = extract_memory_from_content(r"MemAvailable:\s+(\d+)", &file_content)
+                        .unwrap_or(0);
+
+    let memory = format!(
+        "{:.0}MB / {:.0}MB",
+        kb_to_mb(mem_total - mem_available),
+        kb_to_mb(mem_total)
+    );
 
     memory
 }
 
 fn get_shell() -> String {
     let mut shell = String::new();
-    shell.push_str("shell");
+
+    match env::var("SHELL") {
+        Ok(mut desktop_environment) => {
+            shell.push_str(&*desktop_environment);
+        }
+        Err(e) => {
+            shell.push_str("No Info")
+        }
+    }
 
     shell
 }
 
 fn get_desktop() -> String {
     let mut desktop = String::new();
-    desktop.push_str("desktop");
+
+
+    match env::var("XDG_CURRENT_DESKTOP") {
+        Ok(mut desktop_environment) => {
+            desktop.push_str(&*desktop_environment);
+        }
+        Err(e) => {
+            desktop.push_str("No Info")
+        }
+    }
 
     desktop
+}
+
+fn extract_line_from_text(pattern: &str, content: &str) -> Option<String>{
+    let re = Regex::new(pattern).unwrap();
+    match re.captures(content) {
+        Some(cap) => {
+            cap[1].parse().ok()
+        },
+        None => None
+    }
+}
+
+fn get_cpu() -> String {
+    let file_path = "/proc/cpuinfo";
+
+    let file_content = fs::read_to_string(file_path).unwrap_or_default();
+
+    let cpu_info_string = extract_line_from_text(r"model name\s*:\s*(.*?@\s*\d+(\.\d+)?GHz)", &file_content)
+                    .unwrap_or("No info".to_string());
+
+    cpu_info_string
 }
