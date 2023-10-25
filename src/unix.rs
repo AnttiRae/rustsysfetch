@@ -61,23 +61,22 @@ fn get_username() -> String {
 pub fn get_os_release() -> String {
     let file_path = "/etc/os-release";
 
-    let contents = fs::read_to_string(file_path)
-        .expect("Should have been able to read the file");
+    let file_content = fs::read_to_string(file_path).unwrap_or_default();
 
-    let re = Regex::new(r#"ID=(\w+)"#).unwrap();
-    let distro_id = re.captures(&contents).unwrap().get(1).map_or("", |m| m.as_str());
+    let distro_id = extract_line_from_text(r#"ID=[\"']?(\w+)[\"']?"#, &file_content)
+        .unwrap_or("No info".to_string());
+
+    println!("{}", distro_id);
 
     distro_id.to_string()
 }
-
 pub fn get_os_pretty_name() -> String {
     let file_path = "/etc/os-release";
 
-    let contents = fs::read_to_string(file_path)
-        .expect("Should have been able to read the file");
+    let file_content = fs::read_to_string(file_path).unwrap_or_default();
 
-    let re = Regex::new(r#"PRETTY_NAME="(.*)""#).unwrap();
-    let distro_id = re.captures(&contents).unwrap().get(1).map_or("", |m| m.as_str());
+    let distro_id = extract_line_from_text(r#"PRETTY_NAME="(.*)""#, &file_content)
+        .unwrap_or("No info".to_string());
 
     distro_id.to_string()
 }
