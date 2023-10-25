@@ -22,7 +22,7 @@ pub fn get_info() -> Vec<String>{
 
     info.push(host_user_string.blue().to_string());
     info.push(build_lines_row(length));
-    info.push(format!("{} {}", "OS:".blue().to_string(), get_os_release()));
+    info.push(format!("{} {}", "OS:".blue().to_string(), get_os_pretty_name()));
     info.push(format!("{} {}", "Kernel:".blue().to_string(), get_kernel_version()));
     info.push(format!("{} {}", "Desktop:".blue().to_string(), get_desktop()));
 
@@ -65,6 +65,18 @@ pub fn get_os_release() -> String {
         .expect("Should have been able to read the file");
 
     let re = Regex::new(r#"ID=(\w+)"#).unwrap();
+    let distro_id = re.captures(&contents).unwrap().get(1).map_or("", |m| m.as_str());
+
+    distro_id.to_string()
+}
+
+pub fn get_os_pretty_name() -> String {
+    let file_path = "/etc/os-release";
+
+    let contents = fs::read_to_string(file_path)
+        .expect("Should have been able to read the file");
+
+    let re = Regex::new(r#"PRETTY_NAME="(.*)""#).unwrap();
     let distro_id = re.captures(&contents).unwrap().get(1).map_or("", |m| m.as_str());
 
     distro_id.to_string()
