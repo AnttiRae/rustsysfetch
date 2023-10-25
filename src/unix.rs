@@ -3,7 +3,6 @@ use std::fs::File;
 use std::io::Read;
 use regex::Regex;
 use colored::*;
-use colored::Styles::Strikethrough;
 
 
 fn build_lines_row(length: usize) -> String {
@@ -65,8 +64,6 @@ pub fn get_os_release() -> String {
 
     let distro_id = extract_line_from_text(r#"ID=[\"']?(\w+)[\"']?"#, &file_content)
         .unwrap_or("No info".to_string());
-
-    println!("{}", distro_id);
 
     distro_id.to_string()
 }

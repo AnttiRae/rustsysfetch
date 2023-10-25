@@ -8,6 +8,8 @@ use prettytable::format;
 use std::io::{Error};
 use std::io::ErrorKind;
 use rust_embed::EmbeddedFile;
+use colored::*;
+
 #[derive(RustEmbed)]
 #[folder = "logos/"]
 struct Asset;
@@ -45,10 +47,16 @@ fn main() {
         }
     }
 
+    let colored_logo_string = logo_string
+        .lines()
+        .map(|line| format!("{}", line.blue()))
+        .collect::<Vec<_>>()
+        .join("\n");
+
     println!();
     let mut table = Table::new();
     table.set_format(*format::consts::FORMAT_CLEAN);
-    table.add_row(row![&logo_string, &info_string]);
+    table.add_row(row![&colored_logo_string, &info_string]);
     table.printstd();
     println!();
 }
