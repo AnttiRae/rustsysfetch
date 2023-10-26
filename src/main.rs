@@ -39,7 +39,7 @@ fn main() {
             let logo = String::from_utf8(Vec::from(logo_vec)).unwrap();
             logo_string.push_str(&logo);
         },
-        Err(e) => {
+        Err(_e) => {
             let logo = open_asset("penguin").unwrap();
             let logo_vec = logo.data.to_owned();
             let logo = String::from_utf8(Vec::from(logo_vec)).unwrap();

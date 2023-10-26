@@ -16,7 +16,7 @@ fn build_lines_row(length: usize) -> String {
 pub fn get_info() -> Vec<String>{
     let mut info = Vec::new();
 
-    let mut host_user_string = format!("{}@{}", get_hostname(), get_username());
+    let host_user_string = format!("{}@{}", get_hostname(), get_username());
     let length = host_user_string.chars().count();
 
     info.push(host_user_string.blue().to_string());
@@ -46,10 +46,10 @@ fn get_username() -> String {
     let mut username = String::new();
 
     match env::var("USER") {
-        Ok(mut desktop_environment) => {
+        Ok(desktop_environment) => {
             username.push_str(&*desktop_environment);
         }
-        Err(e) => {
+        Err(_e) => {
             username.push_str("No Info")
         }
     }
@@ -101,7 +101,7 @@ fn get_uptime() -> String {
             let uptime_string = uptime.split(".").next().unwrap();
             uptime_seconds = uptime_string.parse().unwrap();
         }
-        Err(e) => {
+        Err(_e) => {
             uptime.push_str("0");
         }
     }
@@ -148,10 +148,10 @@ fn get_shell() -> String {
     let mut shell = String::new();
 
     match env::var("SHELL") {
-        Ok(mut desktop_environment) => {
+        Ok(desktop_environment) => {
             shell.push_str(&*desktop_environment);
         }
-        Err(e) => {
+        Err(_e) => {
             shell.push_str("No Info")
         }
     }
@@ -164,10 +164,10 @@ fn get_desktop() -> String {
 
 
     match env::var("XDG_CURRENT_DESKTOP") {
-        Ok(mut desktop_environment) => {
+        Ok(desktop_environment) => {
             desktop.push_str(&*desktop_environment);
         }
-        Err(e) => {
+        Err(_e) => {
             desktop.push_str("No Info")
         }
     }
@@ -204,7 +204,7 @@ fn get_host_board() -> String {
         Ok(mut file) => {
             file.read_to_string(&mut boardname).unwrap();
         }
-        Err(e) => {
+        Err(_e) => {
             boardname.push_str("0");
         }
     }

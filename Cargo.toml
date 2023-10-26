@@ -1,6 +1,6 @@
 [package]
 name = "rustsysfetch"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 authors = ["Antti Rae anttirae@gmail.com"]
 license = "MIT"
