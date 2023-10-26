@@ -15,10 +15,18 @@ Just run `rustsysfetch`
 
 ## Images
 
-![img_1.png](img_1.png)
+![img_1.png](assets/img_1.png)
 
-![img.png](img.png)
+![img.png](assets/img.png)
 
 ## Stuff I learned:
-- How to code something rust
+- How to code something with Rust
 - How to use cargo to publish a something in crates.io
+
+
+## Todo (some day maybe):
+- Use some third party packages to get system info more reliably.
+- more logos
+
+
+OS logos were made with [Letterpress](https://apps.gnome.org/Letterpress/)
